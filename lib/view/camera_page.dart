@@ -7,13 +7,18 @@ import 'dart:math' as math;
 import '../utils/utils.dart';
 
 class CameraPage extends StatefulWidget {
-  const CameraPage({Key? key}) : super(key: key);
+ final String? mobile;
+  final String? token;
+   CameraPage({Key? key, required this.mobile, required this.token}) : super(key: key);
+
 
   @override
   State<CameraPage> createState() => _CameraPageState();
 }
 
 class _CameraPageState extends State<CameraPage> {
+
+
   // File? _capturedImage;
   //
   // late FaceCameraController controller;
@@ -38,9 +43,11 @@ class _CameraPageState extends State<CameraPage> {
   //   super.initState();
   // }
 
+
+
   @override
   Widget build(BuildContext context) {
-
+    print("In camera page : mobile : ${widget.mobile}, token : ${widget.token}");
 
     final cameraProvider = Provider.of<CameraPageViewModel>(context);
 
@@ -93,9 +100,18 @@ class _CameraPageState extends State<CameraPage> {
                          //   if(cameraProvider.canSubmit==true)
                             Expanded(
                               child: ElevatedButton(
-                                  onPressed: ()  {
-                                    Utils(context: context).snack(message: "No API to Submit", backgroundColor: Colors.red);
+                                  onPressed: () async {
+                                    await cameraProvider.sendImage(widget.mobile,widget.token);
+                                  //  Utils(context: context).snack(message: "No API to Submit", backgroundColor: Colors.red);
+                                    if(cameraProvider.isImageSent == true){
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Successful"),backgroundColor: Colors.green,
+                                          duration: Duration(seconds: 3),));
+                                    }
+                                    else{
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed"),backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 3),));
 
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.blue,
@@ -115,33 +131,35 @@ class _CameraPageState extends State<CameraPage> {
                   ),
                 );
               }
-              return Stack(
-                children: [
-                  SmartFaceCamera(
-                      showCaptureControl: false,
-                      controller: cameraProvider.controller,
-                      messageBuilder: (context, face) {
-                        // if (face == null) {
-                        //   return _message('Place your face in the camera');
-                        // }
-                        if (face == null || !face.wellPositioned || !cameraProvider.isFaceWithinBox(cameraProvider.faceBox!)) {
-                          return _message('Center your face in the square and hold the camera for 5 seconds');
-                        }
-                        return _message("Hold the camera for 5 seconds, Capturing...");
-                      }),
-                  if (cameraProvider.definedBox != null)
-                    Positioned(
-                      left: cameraProvider.definedBox!.left,
-                      top: cameraProvider.definedBox!.top,
-                      child: Container(
-                        width: cameraProvider.definedBox!.width,
-                        height: cameraProvider.definedBox!.height,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.red, width: 2),
+              return Center(
+                child: Stack(
+                  children: [
+                    SmartFaceCamera(
+                        showCaptureControl: false,
+                        controller: cameraProvider.controller,
+                        messageBuilder: (context, face) {
+                          // if (face == null) {
+                          //   return _message('Place your face in the camera');
+                          // }
+                          if (face == null || cameraProvider.faceBox == null ||  !cameraProvider.isFaceWithinBox(cameraProvider.faceBox!)) {
+                            return _message('Center your face in the square and hold the camera..');
+                          }
+                          return _message("Hold the camera, Capturing...");
+                        }),
+                    if (cameraProvider.definedBox != null)
+                      Positioned(
+                        left: cameraProvider.definedBox!.left,
+                        top: cameraProvider.definedBox!.top,
+                        child: Container(
+                          width: cameraProvider.definedBox!.width,
+                          height: cameraProvider.definedBox!.height,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.red, width: 2),
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               );
             }),
           )),

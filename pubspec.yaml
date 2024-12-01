@@ -43,6 +43,7 @@ dependencies:
   connectivity_plus: ^6.1.0
   flutter_launcher_icons: ^0.14.1
   path_provider: ^2.1.5
+  http: ^1.2.2
 flutter_launcher_icons:
   android: "launcher_icon"
   image_path: "images/icon.png"
